@@ -1,0 +1,50 @@
+{
+  "name": "carousel",
+  "version": "0.0.0",
+  "files": [
+    "dist"
+  ],
+  "main": "./dist/carousel.umd.js",
+  "module": "./dist/carousel.es.js",
+  "exports": {
+    ".": {
+      "import": "./dist/carousel.es.js",
+      "require": "./dist/carousel.umd.js"
+    }
+  },
+  "scripts": {
+    "co": "sui-mono commit",
+    "dev": "vite",
+    "lint": "npx eslint .",
+    "build": "tsc && vite build",
+    "serve": "vite preview"
+  },
+  "devDependencies": {
+    "@s-ui/mono": "^2.18.0",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
+    "eslint": "^7.32.0",
+    "eslint-config-standard-with-typescript": "^21.0.1",
+    "eslint-plugin-import": "^2.25.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.1.0",
+    "typescript": "^4.4.4",
+    "vite": "^2.6.4"
+  },
+  "dependencies": {
+    "lit": "^2.0.2"
+  },
+  "eslintConfig": {
+    "extends": [
+      "standard-with-typescript"
+    ],
+    "parserOptions": {
+      "project": "./tsconfig.json"
+    },
+    "rules": {
+      "@typescript-eslint/explicit-function-return-type": "off",
+      "@typescript-eslint/restrict-plus-operands": "off",
+      "@typescript-eslint/strict-boolean-expressions": "off",
+      "array-callback-return": "off"
+    }
+  }
+}
