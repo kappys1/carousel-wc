@@ -1,6 +1,7 @@
 import { css } from 'lit'
 
 export const carouselStyle = css`
+
 :host{
     display: flex;
 }
@@ -27,7 +28,7 @@ export const carouselStyle = css`
     -o-transition: -o-transform 300ms;
     transition: transform 300ms;
 }
-/* .container .carousel .item-carousel {  */
+
 :host .container .carousel ::slotted(.item-carousel) {
     display: block;
     position: absolute;
@@ -41,7 +42,7 @@ export const carouselStyle = css`
 }
 
 
-:host .container .carousel::content > .item-carousel img {
+/* :host .container .carousel > .item-carousel img {
     user-drag: none;
     user-select: none;
     -moz-user-select: none;
@@ -49,7 +50,17 @@ export const carouselStyle = css`
     -webkit-user-select: none;
     -ms-user-select: none;
     border: 1px solid red;
-}
+} */
+
+/* :host .container .carousel ::slotted(.item-carousel){
+    user-drag: none;
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    border: 1px solid red;
+} */
 
 :host .container .carousel ::slotted(.item-carousel.next),
 :host .container .carousel ::slotted(.item-carousel.prev),

@@ -1,73 +1,47 @@
-import { LitElement, html } from 'lit'
-import { directive } from 'lit/directive.js'
-import { customElement, property } from 'lit/decorators.js'
+
 import { carouselStyle } from './carousel.style'
 import { DomChangeDirective } from './directives/dom-change.directive'
 import Carousel from './model/Carousel'
 import { SwiperDirective, EVENTS } from './directives/swiper.directive'
+import { EventBus } from './eventBus'
 import { EventEmitter } from './EventEmitter'
 
-@customElement('carousel-component')
-export default class CarouselComponent extends LitElement {
+export default class CarouselCore {
   static styles = carouselStyle
 
-  /* @state() */
   public carousel: Carousel = new Carousel()
 
-  /* @state() */ private radius: number = 0
-  /* @state() */ private rotationFn: string = ''
-  /* @state() */ private itemsCarouselRendered = 0
+  private radius: number = 0
+  private rotationFn: string = ''
+  private itemsCarouselRendered = 0
 
-  @property() public morePairSlides = 1
-  @property() public threshold = 5
-  @property() public angle = 45
-  @property() public ratioScale = 1
-  @property() public margin = 20
-  @property() public perspective = 2000
-  @property() public endInSlide = true
-  @property() public timeToSlide = 300
-  @property() public lockSlides = false
-  @property() public initialSlide = 0
-  @property() public loop = false
-  @property() public mode = 'horizontal'
+  public morePairSlides = 1
+  public threshold = 5
+  public angle = 45
+  public ratioScale = 1
+  public margin = 20
+  public perspective = 2000
+  public endInSlide = true
+  public timeToSlide = 300
+  public lockSlides = false
+  public initialSlide = 0
+  public loop = false
+  public mode = 'horizontal'
 
   // autoPlay
-  @property() public autoPlay = false
-  @property() public delayAutoPlay = 3000
+  public autoPlay = false
+  public delayAutoPlay = 3000
   private autoPlayTimeout: any
 
-  /* @state() */ carouselElm!: any
-  /* @state() */ containerElm!: any
-  /* @state() */ itemsCarouselElm: any
+  carouselElm!: any
+  containerElm!: any
+  itemsCarouselElm: any
   eventBus: any
 
-  domChangeDirective = directive(DomChangeDirective)
-  swiperDirective = directive(SwiperDirective)
-
-  constructor () {
-    super()
+  constructor (carouselElm, containerElm, itemsCarouselElm) {
     this.carousel = new Carousel()
-  }
-
-  render () {
-    return html`
-      <div class="container">
-        <div class="carousel" swiper (domChange)="onDomChange($event)">
-          ${this.domChangeDirective(this.onDomChange)}
-          ${this.swiperDirective()}
-          <slot></slot>
-
-        </div>
-      </div>
-    `
-  }
-
-  firstUpdated () {
-    this.carouselElm = this.renderRoot.querySelector('.carousel')
-    this.containerElm = this.renderRoot.querySelector('.container')
-    const slot = this.carouselElm.querySelector('slot')
-    this.itemsCarouselElm = slot.assignedNodes({ flatten: true }).filter((node: any) => node.nodeType === Node.ELEMENT_NODE)
-    this.itemsCarouselRendered = this.itemsCarouselElm.length
+    this.carouselElm = carouselElm
+    this.containerElm = containerElm
     this.eventBus = new EventEmitter(this.carouselElm)
     this.initEventsPan()
     this.configPlugin()
@@ -85,13 +59,7 @@ export default class CarouselComponent extends LitElement {
     }
   }
 
-  // update () {
-  // console.log(this)
-  // this.onInit.emit(this.carousel)
-  // this.itemsCarouselRendered = this.carouselElm.getElementsByClassName('item-carousel').length
-  // }
-  disconnectedCallback () {
-    super.disconnectedCallback()
+  disconnectEvents () {
     this.eventBus.off(EVENTS.SWIPE, this.rotate)
     this.eventBus.off(EVENTS.SWIPE_END, this.rotate)
   }
@@ -176,7 +144,6 @@ export default class CarouselComponent extends LitElement {
   }
 
   private rotate (e: any) {
-    console.log(e, this.carousel.lockSlides)
     if (!this.carousel.lockSlides) {
       const velocity = this.carousel.isHorizontal ? e.velocityX / this.threshold : -e.velocityY / this.threshold
       this.setNewDeg(this.carousel.currdeg + velocity * window.devicePixelRatio)
@@ -404,5 +371,9 @@ export default class CarouselComponent extends LitElement {
   //   window.addEventListener('resize', function () {
   //     this.update()
   //   }.bind(this))
+  // }
+
+  // protected createRenderRoot () {
+  //   return this
   // }
 }

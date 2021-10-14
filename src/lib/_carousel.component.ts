@@ -1,45 +1,41 @@
 import { LitElement, html } from 'lit'
 import { directive } from 'lit/directive.js'
-import { customElement, property } from 'lit/decorators.js'
+import { customElement } from 'lit/decorators.js'
 import { carouselStyle } from './carousel.style'
 import { DomChangeDirective } from './directives/dom-change.directive'
 import Carousel from './model/Carousel'
-import { SwiperDirective, EVENTS } from './directives/swiper.directive'
-import { EventEmitter } from './EventEmitter'
+import { SwiperDirective } from './directives/swiper.directive'
 
 @customElement('carousel-component')
 export default class CarouselComponent extends LitElement {
   static styles = carouselStyle
 
-  /* @state() */
   public carousel: Carousel = new Carousel()
+  private radius: number = 0
+  private rotationFn: string = ''
+  private itemsCarouselRendered = 0
 
-  /* @state() */ private radius: number = 0
-  /* @state() */ private rotationFn: string = ''
-  /* @state() */ private itemsCarouselRendered = 0
-
-  @property() public morePairSlides = 1
-  @property() public threshold = 5
-  @property() public angle = 45
-  @property() public ratioScale = 1
-  @property() public margin = 20
-  @property() public perspective = 2000
-  @property() public endInSlide = true
-  @property() public timeToSlide = 300
-  @property() public lockSlides = false
-  @property() public initialSlide = 0
-  @property() public loop = false
-  @property() public mode = 'horizontal'
+  /* @Input() */ public morePairSlides = 1
+  /* @Input() */ public threshold = 5
+  /* @Input() */ public angle = 45
+  /* @Input() */ public ratioScale = 1
+  /* @Input() */ public margin = 20
+  /* @Input() */ public perspective = 2000
+  /* @Input() */ public endInSlide = true
+  /* @Input() */ public timeToSlide = 300
+  /* @Input() */ public lockSlides = false
+  /* @Input() */ public initialSlide = 0
+  /* @Input() */ public loop = false
+  /* @Input() */ public mode = 'horizontal'
 
   // autoPlay
-  @property() public autoPlay = false
-  @property() public delayAutoPlay = 3000
+  /* @Input() */ public autoPlay = false
+  /* @Input() */ public delayAutoPlay = 3000
   private autoPlayTimeout: any
 
-  /* @state() */ carouselElm!: any
-  /* @state() */ containerElm!: any
-  /* @state() */ itemsCarouselElm: any
-  eventBus: any
+  carouselElm!: any
+  containerElm!: any
+  itemsCarouselElm: any
 
   domChangeDirective = directive(DomChangeDirective)
   swiperDirective = directive(SwiperDirective)
@@ -53,10 +49,9 @@ export default class CarouselComponent extends LitElement {
     return html`
       <div class="container">
         <div class="carousel" swiper (domChange)="onDomChange($event)">
-          ${this.domChangeDirective(this.onDomChange)}
-          ${this.swiperDirective()}
+        ${this.domChangeDirective(this.onDomChange)}
+        ${this.swiperDirective()}
           <slot></slot>
-
         </div>
       </div>
     `
@@ -68,7 +63,6 @@ export default class CarouselComponent extends LitElement {
     const slot = this.carouselElm.querySelector('slot')
     this.itemsCarouselElm = slot.assignedNodes({ flatten: true }).filter((node: any) => node.nodeType === Node.ELEMENT_NODE)
     this.itemsCarouselRendered = this.itemsCarouselElm.length
-    this.eventBus = new EventEmitter(this.carouselElm)
     this.initEventsPan()
     this.configPlugin()
   }
@@ -90,11 +84,6 @@ export default class CarouselComponent extends LitElement {
   // this.onInit.emit(this.carousel)
   // this.itemsCarouselRendered = this.carouselElm.getElementsByClassName('item-carousel').length
   // }
-  disconnectedCallback () {
-    super.disconnectedCallback()
-    this.eventBus.off(EVENTS.SWIPE, this.rotate)
-    this.eventBus.off(EVENTS.SWIPE_END, this.rotate)
-  }
 
   ngOnChanges (changes: any) {
     Object.keys(changes).map(val => {
@@ -171,21 +160,24 @@ export default class CarouselComponent extends LitElement {
   }
 
   private initEventsPan () {
-    this.eventBus.on(EVENTS.SWIPE, (e) => this.rotate(e.detail))
-    this.eventBus.on(EVENTS.SWIPE_END, (e) => this.rotate(e.detail))
+    // this.swiper.onSwipe.subscribe((distance: number) => {
+    //   this.rotate(distance)
+    // })
+    // this.swiper.onSwipeEnd.subscribe((distance: number) => {
+    //   this.rotate(distance)
+    // })
   }
 
-  private rotate (e: any) {
-    console.log(e, this.carousel.lockSlides)
-    if (!this.carousel.lockSlides) {
-      const velocity = this.carousel.isHorizontal ? e.velocityX / this.threshold : -e.velocityY / this.threshold
-      this.setNewDeg(this.carousel.currdeg + velocity * window.devicePixelRatio)
-      this.moveCarrousel(this.carousel.currdeg)
-      if (e.isFinal && this.endInSlide) {
-        this.moveSlideTo(this.carousel.activeIndex)
-      }
-    }
-  }
+  // private rotate (e: any) {
+  //   if (!this.carousel.lockSlides) {
+  //     const velocity = this.carousel.isHorizontal ? e.velocityX / this.threshold : -e.velocityY / this.threshold
+  //     this.setNewDeg(this.carousel.currdeg + velocity * window.devicePixelRatio)
+  //     this.moveCarrousel(this.carousel.currdeg)
+  //     if (e.isFinal && this.endInSlide) {
+  //       this.moveSlideTo(this.carousel.activeIndex)
+  //     }
+  //   }
+  // }
 
   private autoPlaySlide () {
     if (this.autoPlay) {
@@ -261,6 +253,7 @@ export default class CarouselComponent extends LitElement {
   }
 
   private setPerspectiveContainer () {
+    console.log(this.containerElm)
     this.containerElm.style.perspective = this.perspective
     this.containerElm.style.webkitPerspective = this.perspective
     this.containerElm.style.MozPerspective = this.perspective

@@ -1,5 +1,6 @@
 
 import { Directive } from 'lit/directive.js'
+import { EventEmitter } from '../EventEmitter'
 
 const ZERO = 0.000000000001
 const DIRECTION = {
@@ -8,6 +9,16 @@ const DIRECTION = {
   UP: 'up',
   DOWN: 'down',
   NONE: 'none'
+}
+
+export const EVENTS = {
+  SWIPE_RIGHT: 'swipeRight',
+  SWIPE_LEFT: 'swipeLeft',
+  SWIPE_UP: 'swipeUp',
+  SWIPE_DOWN: 'swipeDown',
+  SWIPE: 'swipe',
+  SWIPE_START: 'swipeStart',
+  SWIPE_END: 'swipeEnd'
 }
 
 export class SwiperDirective extends Directive {
@@ -21,27 +32,18 @@ export class SwiperDirective extends Directive {
   firstSwipeDate = Date.now()
   direction = DIRECTION.NONE
 
-  // @Output() onSwipeRight: EventEmitter<any> = new EventEmitter<any>()
-  // @Output() onSwipeLeft: EventEmitter<any> = new EventEmitter<any>()
-  // @Output() onSwipeUp: EventEmitter<any> = new EventEmitter<any>()
-  // @Output() onSwipeDown: EventEmitter<any> = new EventEmitter<any>()
-  // @Output() onSwipe: EventEmitter<any> = new EventEmitter<any>()
-  // @Output() onSwipeStart: EventEmitter<any> = new EventEmitter<any>()
-  // @Output() onSwipeEnd: EventEmitter<any> = new EventEmitter<any>()
-  // @Output() swipeLeft: EventEmitter<any> = new EventEmitter<any>()
-  // @Output() swipeRight: EventEmitter<any> = new EventEmitter<any>()
-
   private readonly element
+  private readonly eventBus
   constructor (partInfo: any) {
     super(partInfo)
     this.element = partInfo.parentNode
+    this.eventBus = new EventEmitter(this.element)
     this.element.addEventListener('touchstart', (e: Event) => this.onTouchStart(e))
     this.element.addEventListener('touchend', (e: Event) => this.onTouchEnd(e))
     this.element.addEventListener('touchmove', (e: Event) => this.onTouchMove(e))
     this.element.addEventListener('mousedown', (e: Event) => this.onMouseDown(e))
     this.element.addEventListener('mouseup', (e: Event) => this.onMouseUp(e))
     this.element.addEventListener('mousemove', (e: Event) => this.onMouseMove(e))
-    console.log(this, partInfo)
   }
 
   getResultFromEvent (event: any) {
@@ -73,6 +75,7 @@ export class SwiperDirective extends Directive {
     this.initialPosY = event.clientY
     this.swipeDistanceX = ZERO
     this.swipeDistanceY = ZERO
+    this.eventBus.emit(EVENTS.SWIPE_START, event)
     // this.onSwipeStart.emit()
   }
 
@@ -86,6 +89,7 @@ export class SwiperDirective extends Directive {
       isFinal: !this.isDown
     }
     console.log(res, event)
+    this.eventBus.emit(EVENTS.SWIPE_END, res)
     // this.onSwipeEnd.emit(res)
     this.swipeDistanceX = ZERO
     this.swipeDistanceY = ZERO
@@ -95,17 +99,22 @@ export class SwiperDirective extends Directive {
     const res = this.getResultFromEvent(event)
     if (res.velocityX > 0) {
       this.direction = DIRECTION.LEFT
+      this.eventBus.emit(EVENTS.SWIPE_LEFT, res)
       // this.onSwipeLeft.emit(res)
     } else if (res.velocityX < 0) {
       this.direction = DIRECTION.RIGHT
+      this.eventBus.emit(EVENTS.SWIPE_RIGHT, res)
       // this.onSwipeRight.emit(res)
     } else if (res.velocityY > 0) {
       this.direction = DIRECTION.DOWN
+      this.eventBus.emit(EVENTS.SWIPE_DOWN, res)
       // this.onSwipeDown.emit(res)
     } else if (res.velocityY < 0) {
       this.direction = DIRECTION.UP
+      this.eventBus.emit(EVENTS.SWIPE_UP, res)
       // this.onSwipeUp.emit(res)
     }
+    this.eventBus.emit(EVENTS.SWIPE, res)
     // this.onSwipe.emit(res)
   }
 
@@ -113,7 +122,6 @@ export class SwiperDirective extends Directive {
   onTouchStart (event: any) {
     const touch = event.touches[0] || event.changedTouches[0]
     this.swipeStart(touch)
-    console.log(touch)
   }
 
   // @HostListener('mousedown', ['$event'])
