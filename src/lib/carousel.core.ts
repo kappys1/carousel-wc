@@ -1,36 +1,35 @@
 
+import { ICarouselCoreConfig } from './carousel.interface'
 import { carouselStyle } from './carousel.style'
-import { DomChangeDirective } from './directives/dom-change.directive'
-import Carousel from './model/Carousel'
-import { SwiperDirective, EVENTS } from './directives/swiper.directive'
-import { EventBus } from './eventBus'
+import { checkDefaultProps } from './carousel.utils'
+import { EVENTS } from './directives/swiper.directive'
 import { EventEmitter } from './EventEmitter'
+import Carousel from './model/Carousel'
 
 export default class CarouselCore {
   static styles = carouselStyle
 
   public carousel: Carousel = new Carousel()
 
+  private config: ICarouselCoreConfig = {
+    initialSlide: 0,
+    morePairSlides: 1,
+    threshold: 5,
+    angle: 45,
+    margin: 20,
+    perspective: 2000,
+    endInSlide: true,
+    timeToSlide: 300,
+    lockSlides: false,
+    loop: false,
+    mode: 'horizontal',
+    autoPlay: false,
+    delayAutoPlay: 3000
+  }
+
   private radius: number = 0
   private rotationFn: string = ''
-  private itemsCarouselRendered = 0
-
-  public morePairSlides = 1
-  public threshold = 5
-  public angle = 45
-  public ratioScale = 1
-  public margin = 20
-  public perspective = 2000
-  public endInSlide = true
-  public timeToSlide = 300
-  public lockSlides = false
-  public initialSlide = 0
-  public loop = false
-  public mode = 'horizontal'
-
-  // autoPlay
-  public autoPlay = false
-  public delayAutoPlay = 3000
+  public itemsCarouselRendered = 0
   private autoPlayTimeout: any
 
   carouselElm!: any
@@ -38,40 +37,39 @@ export default class CarouselCore {
   itemsCarouselElm: any
   eventBus: any
 
-  constructor (carouselElm, containerElm, itemsCarouselElm) {
-    this.carousel = new Carousel()
+  constructor (carouselElm: any, containerElm: any, itemsCarouselElm: any, config?: any) {
     this.carouselElm = carouselElm
     this.containerElm = containerElm
+    this.itemsCarouselElm = itemsCarouselElm
+    this.itemsCarouselRendered = this.itemsCarouselElm.length
     this.eventBus = new EventEmitter(this.carouselElm)
+    this.setConfig(config)
     this.initEventsPan()
     this.configPlugin()
   }
 
-  onDomChange ($event: any) {
-    if ($event.addedNodes.length > 0) {
-      if (this.itemsCarouselRendered === 0) {
-        this.reInit()
-      } else {
-        this.updateFn()
-        this.updateCssShowSlides()
-      }
-      this.itemsCarouselRendered = this.itemsCarouselElm.length.length
-    }
-  }
-
-  disconnectEvents () {
-    this.eventBus.off(EVENTS.SWIPE, this.rotate)
-    this.eventBus.off(EVENTS.SWIPE_END, this.rotate)
-  }
-
-  ngOnChanges (changes: any) {
-    Object.keys(changes).map(val => {
-      if (changes[val].currentValue !== changes[val].previousValue && !changes[val].isFirstChange()) {
-        this.updateFn()
-        // this.onChangeProperties.emit(changes)
-      }
-      return ''
+  public setConfig (config: ICarouselCoreConfig) {
+    this.config = Object.assign(this.config, {
+      mode: config.mode && config.mode === 'vertical' ? 'vertical' : 'horizontal',
+      initialSlide: checkDefaultProps<number>(config.initialSlide, 0),
+      morePairSlides: checkDefaultProps<number>(config.morePairSlides, 1),
+      threshold: checkDefaultProps<number>(config.threshold, 1, 5),
+      angle: checkDefaultProps<number>(config.angle, 1, 45),
+      margin: checkDefaultProps<number>(config.margin, 0, 20),
+      perspective: checkDefaultProps<number>(config.perspective, 1, 2000),
+      endInSlide: checkDefaultProps<boolean>(config.endInSlide, true),
+      timeToSlide: checkDefaultProps<number>(config.timeToSlide, 1, 300),
+      lockSlides: checkDefaultProps<boolean>(config.lockSlides, false),
+      loop: checkDefaultProps<boolean>(config.loop, false),
+      autoPlay: checkDefaultProps<boolean>(config.autoPlay, false),
+      delayAutoPlay: checkDefaultProps<number>(config.delayAutoPlay, 1, 3000)
     })
+    console.log(this.config)
+  }
+
+  public updateWithConfig (config: ICarouselCoreConfig) {
+    this.setConfig(config)
+    this.updateFn()
   }
 
   public lockCarousel (val: boolean) {
@@ -100,7 +98,7 @@ export default class CarouselCore {
   }
 
   public autoPlayStart () {
-    this.autoPlay = true
+    this.config.autoPlay = true
     this.autoPlaySlide()
   }
 
@@ -110,7 +108,7 @@ export default class CarouselCore {
   }
 
   public toggleMode () {
-    this.mode = this.mode === 'vertical' ? 'horizontal' : 'vertical'
+    this.config.mode = this.config.mode === 'vertical' ? 'horizontal' : 'vertical'
     this.updateFn()
   }
 
@@ -125,7 +123,7 @@ export default class CarouselCore {
     this.carousel.items = [...this.itemsCarouselElm]
     this.carousel.totalItems = this.carousel.items.length
     this.getmaxSizes()
-    this.carousel.lockSlides = this.lockSlides
+    this.carousel.lockSlides = this.config.lockSlides
     this.setDegreesOnSlides()
     this.setTransformCarrousel(-this.carousel.degreesSlides[this.carousel.activeIndex])
   }
@@ -139,43 +137,48 @@ export default class CarouselCore {
   }
 
   private initEventsPan () {
-    this.eventBus.on(EVENTS.SWIPE, (e) => this.rotate(e.detail))
-    this.eventBus.on(EVENTS.SWIPE_END, (e) => this.rotate(e.detail))
+    this.eventBus.on(EVENTS.SWIPE, (e: any) => this.rotate(e.detail))
+    this.eventBus.on(EVENTS.SWIPE_END, (e: any) => this.rotate(e.detail))
+  }
+
+  public removeEventsPan () {
+    this.eventBus.off(EVENTS.SWIPE, this.rotate)
+    this.eventBus.off(EVENTS.SWIPE_END, this.rotate)
   }
 
   private rotate (e: any) {
     if (!this.carousel.lockSlides) {
-      const velocity = this.carousel.isHorizontal ? e.velocityX / this.threshold : -e.velocityY / this.threshold
+      const velocity = this.carousel.isHorizontal ? e.velocityX / this.config.threshold : -e.velocityY / this.config.threshold
       this.setNewDeg(this.carousel.currdeg + velocity * window.devicePixelRatio)
       this.moveCarrousel(this.carousel.currdeg)
-      if (e.isFinal && this.endInSlide) {
+      if (e.isFinal && this.config.endInSlide) {
         this.moveSlideTo(this.carousel.activeIndex)
       }
     }
   }
 
   private autoPlaySlide () {
-    if (this.autoPlay) {
+    if (this.config.autoPlay) {
       this.autoPlayTimeout = setTimeout(() => {
         this.carousel.autoPlayIsRunning = true
         this.slideNext()
         this.autoPlaySlide()
-      }, this.delayAutoPlay)
+      }, this.config.delayAutoPlay)
     }
   }
 
   private initSlidesOn () {
-    if (this.initialSlide >= 0 && this.initialSlide < this.carousel.items.length) {
-      this.carousel.activeIndex = parseInt(this.initialSlide.toString())
-    } else if (this.initialSlide >= this.carousel.items.length) {
+    if (this.config.initialSlide >= 0 && this.config.initialSlide < this.carousel.items.length) {
+      this.carousel.activeIndex = parseInt(this.config.initialSlide.toString())
+    } else if (this.config.initialSlide >= this.carousel.items.length) {
       this.carousel.activeIndex = this.carousel.items.length - 1
-      this.initialSlide = this.carousel.activeIndex
+      this.config.initialSlide = this.carousel.activeIndex
     } else {
       this.carousel.activeIndex = 0
-      this.initialSlide = this.carousel.activeIndex
+      this.config.initialSlide = this.carousel.activeIndex
     }
 
-    const newDeg = this.carousel.activeIndex * this.angle
+    const newDeg = this.carousel.activeIndex * this.config.angle
     this.setNewDeg(-newDeg)
     this.setTransformCarrousel(-newDeg)
   }
@@ -191,7 +194,7 @@ export default class CarouselCore {
   }
 
   private checkRotation () {
-    this.carousel.isHorizontal = this.mode !== 'vertical'
+    this.carousel.isHorizontal = this.config.mode !== 'vertical'
     this.rotationFn = this.carousel.isHorizontal
       ? 'rotateY'
       : 'rotateX'
@@ -203,7 +206,7 @@ export default class CarouselCore {
 
   private moveSlideTo (index: number) {
     this.setNewDeg(-this.carousel.degreesSlides[index])
-    this.moveCarrousel(this.carousel.currdeg, this.timeToSlide)
+    this.moveCarrousel(this.carousel.currdeg, this.config.timeToSlide)
   }
 
   private moveCarrousel (deg: number, timeTransform: number = 0) {
@@ -228,9 +231,9 @@ export default class CarouselCore {
   }
 
   private setPerspectiveContainer () {
-    this.containerElm.style.perspective = this.perspective
-    this.containerElm.style.webkitPerspective = this.perspective
-    this.containerElm.style.MozPerspective = this.perspective
+    this.containerElm.style.perspective = this.config.perspective
+    this.containerElm.style.webkitPerspective = this.config.perspective
+    this.containerElm.style.MozPerspective = this.config.perspective
   }
 
   private getmaxSizes () {
@@ -257,10 +260,10 @@ export default class CarouselCore {
   }
 
   private setDegreesOnSlides () {
-    let auxDegree = 0
+    let auxDegree: number = 0
     const panelSize = this.carousel.isHorizontal ? this.carousel.maxWidthSize : this.carousel.maxHeightSize
     this.radius = (Math.round((panelSize / 2) /
-      Math.tan(Math.PI / (360 / this.angle))) + this.margin)
+      Math.tan(Math.PI / (360 / this.config.angle))) + this.config.margin)
     this.carousel.degreesSlides = []
     this.carousel.items.map((val: any) => {
       const transform = `${this.rotationFn}(${auxDegree}deg) translateZ(${this.radius}px)`
@@ -268,7 +271,7 @@ export default class CarouselCore {
       val.style.webkitTransform = transform
       this.carousel.degreesSlides.push(auxDegree)
       this.carousel.maxDegree = auxDegree
-      auxDegree += this.angle
+      auxDegree += this.config.angle
     })
   }
 
@@ -286,17 +289,10 @@ export default class CarouselCore {
       this.carousel.lastIndex = this.carousel.activeIndex
       this.carousel.activeIndex = index
       this.updateCssShowSlides()
-
-      // this.onSlideChange.emit(this.carousel)
-      // if (this.carousel.activeIndex === 0) {
-      //   this.onReachBeginning.emit(this.carousel)
-      // } else if (this.carousel.activeIndex === this.carousel.totalItems - 1) {
-      //   this.onReachEnd.emit(this.carousel)
-      // }
     }
   }
 
-  private updateCssShowSlides () {
+  public updateCssShowSlides () {
     const currentIndex = this.carousel.activeIndex
     const actual: any = this.carousel.items[currentIndex]
     this.removeClassShowSlides('actual')
@@ -305,7 +301,7 @@ export default class CarouselCore {
     if (actual) {
       actual.classList.add('actual')
     }
-    for (let x = 0; x < this.morePairSlides; x++) {
+    for (let x = 0; x < this.config.morePairSlides; x++) {
       const prev = this.carousel.items[currentIndex - (x + 1)]
       const next = this.carousel.items[currentIndex + (x + 1)]
       if (prev) {
@@ -324,56 +320,4 @@ export default class CarouselCore {
       })
     }
   }
-
-  // private manageEvents () {
-  //   const options: any = {
-  //     preventDefault: true
-  //   }
-  //   const vm = this
-
-  //   this.swiper.onSwipe.subscribe((e: number) => {
-  //     vm.onSlideMove.emit({ carousel: vm.carousel, event: e })
-  //     vm.onTouchMove.emit({ carousel: vm.carousel, event: e })
-  //   })
-  //   this.swiper.onSwipeStart.subscribe((e: number) => {
-  //     vm.onSlideMoveStart.emit({ carousel: vm.carousel, event: e })
-  //     vm.onTouchStart.emit({ carousel: vm.carousel, event: e })
-  //   })
-  //   this.swiper.onSwipeEnd.subscribe((e: number) => {
-  //     vm.onSlideMoveEnd.emit({ carousel: vm.carousel, event: e })
-  //     vm.onTouchEnd.emit({ carousel: vm.carousel, event: e })
-  //   })
-
-  //   this.carouselElm.addEventListener('transitionend', (e: any) => {
-  //     const elm = { carousel: vm.carousel, event: e }
-  //     if (e.propertyName === 'transform') {
-  //       this.onTransitionEnd.emit(elm)
-  //       if (vm.carousel.lastIndex > vm.carousel.activeIndex) {
-  //         this.onSlideNextTransitionEnd.emit(elm)
-  //       } else {
-  //         this.onSlidePrevTransitionEnd.emit(elm)
-  //       }
-  //     }
-  //   })
-
-  //   this.carouselElm.addEventListener('transitionstart', (e: any) => {
-  //     const elm = { carousel: vm.carousel, event: e }
-  //     if (e.propertyName === 'transform') {
-  //       this.onTransitionStart.emit(elm)
-  //       // if (e.direction === Hammer.DIRECTION_LEFT) {
-  //       //   vm.onSlideNextTransitionStart.emit(elm);
-  //       // } else if (e.direction === Hammer.DIRECTION_RIGHT) {
-  //       //   vm.onSlidePrevTransitionStart.emit(elm);
-  //       // }
-  //     }
-  //   })
-
-  //   window.addEventListener('resize', function () {
-  //     this.update()
-  //   }.bind(this))
-  // }
-
-  // protected createRenderRoot () {
-  //   return this
-  // }
 }
