@@ -38,7 +38,6 @@ export const carouselStyle = css`
     text-align: center;
     transform-style: preserve-3d;
     opacity: 0;
-    color: red;
 }
 
 
@@ -52,15 +51,14 @@ export const carouselStyle = css`
     border: 1px solid red;
 } */
 
-/* :host .container .carousel ::slotted(.item-carousel){
+:host .container .carousel ::slotted(img){
     user-drag: none;
     user-select: none;
     -moz-user-select: none;
     -webkit-user-drag: none;
     -webkit-user-select: none;
     -ms-user-select: none;
-    border: 1px solid red;
-} */
+}
 
 :host .container .carousel ::slotted(.item-carousel.next),
 :host .container .carousel ::slotted(.item-carousel.prev),

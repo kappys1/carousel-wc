@@ -1,4 +1,6 @@
-import './lib/carousel.component'
+import { Carousel } from './lib/carousel.component'
+
+import './style.css'
 const app = document.querySelector<HTMLDivElement>('#app')!
 
 app.innerHTML = `
@@ -10,3 +12,7 @@ app.innerHTML = `
     </div>
   </carousel-component>
 `
+
+setTimeout(() => {
+  Carousel.slideNext()
+}, 1000)

@@ -7,6 +7,7 @@ import { SwiperDirective } from './directives/swiper.directive'
 import CarouselCore from './carousel.core'
 import { ICarouselCoreConfig } from './carousel.interface'
 
+export let Carousel: any = null
 @customElement('carousel-component')
 export default class CarouselComponent extends LitElement {
   static styles = carouselStyle
@@ -55,18 +56,21 @@ export default class CarouselComponent extends LitElement {
     const itemsCarouselElm = slot.assignedNodes({ flatten: true }).filter((node: any) => node.nodeType === Node.ELEMENT_NODE)
     const config = this.getParamsProperties()
     this.carouselCore = new CarouselCore(carouselElm, containerElm, itemsCarouselElm, config)
+    Carousel = this.carouselCore
     // todo event init
   }
 
   onDomChange ($event: any) {
     if (this && this.carouselCore && $event.addedNodes.length > 0) {
-      if (this.carouselCore.itemsCarouselRendered === 0) {
-        this.reInit()
+      const carouselConfig = this.carouselCore.getConfig()
+      console.log(carouselConfig)
+      if (carouselConfig.itemsCarouselRendered === 0) {
+        this.carouselCore.reInit()
       } else {
         this.carouselCore.updateFn()
         this.carouselCore.updateCssShowSlides()
       }
-      this.carouselCore.itemsCarouselRendered = this.carouselCore?.itemsCarouselElm.length.length
+      carouselConfig.itemsCarouselRendered = this.carouselCore?.itemsCarouselElm.length.length
     }
   }
 
@@ -76,7 +80,6 @@ export default class CarouselComponent extends LitElement {
   }
 
   updated () {
-    console.log('hola')
     this.updateCarouselCore()
   }
   //
@@ -86,58 +89,23 @@ export default class CarouselComponent extends LitElement {
   //
   // Start: -- Public interface methods
   //
-  public getParamsProperties (): ICarouselCoreConfig {
+  private getParamsProperties (): ICarouselCoreConfig {
     return {
       mode: this.mode,
       morePairSlides: this.morePairSlides,
       threshold: this.threshold,
       angle: this.angle,
-      ratioScale: this.ratioScale,
       margin: this.margin,
       perspective: this.perspective,
       endInSlide: this.endInSlide,
       timeToSlide: this.timeToSlide,
       lockSlides: this.lockSlides,
       initialSlide: this.initialSlide,
-      loop: this.loop
+      loop: this.loop,
+      autoPlay: this.autoPlay,
+      delayAutoPlay: this.delayAutoPlay
     }
   }
-
-  public lockCarousel (val: boolean) {
-    this.carouselCore?.lockCarousel(val)
-  }
-
-  public slideNext () {
-    this.carouselCore?.slideNext()
-  }
-
-  public slidePrev () {
-    this.carouselCore?.slidePrev()
-  }
-
-  public slideTo (index: number) {
-    this.carouselCore?.slideTo(index)
-  }
-
-  public autoPlayStart () {
-    this.carouselCore?.autoPlayStart()
-  }
-
-  public autoPlayStop () {
-    this.carouselCore?.autoPlayStop()
-  }
-
-  public toggleMode () {
-    this.carouselCore?.toggleMode()
-  }
-
-  public reInit () {
-    this.carouselCore?.reInit()
-  }
-
-  //
-  // END: -- Public interface methods
-  //
 
   private updateCarouselCore () {
     if (this.carouselCore) {
@@ -145,6 +113,10 @@ export default class CarouselComponent extends LitElement {
       this.carouselCore.updateWithConfig(config)
     }
   }
+
+  //
+  // END: -- Public interface methods
+  //
 
   // private manageEvents () {
   //   const options: any = {
