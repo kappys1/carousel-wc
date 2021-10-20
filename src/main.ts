@@ -24,8 +24,9 @@ app.innerHTML = `
 `
 setTimeout(() => {
   const elm = document.querySelector('#carousel1')
+  console.log(elm)
   const carousel1 = new Carousel(elm)
   setTimeout(() => {
-    carousel1.toggleMode()
+    carousel1.lockSlides(true)
   }, 1000)
 })

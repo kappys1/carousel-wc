@@ -36,20 +36,22 @@ export default class CarouselConfig {
   }
 
   public setConfig (config: Partial<ICarouselCoreConfig>) {
+    console.log(config)
     this.config = Object.assign(this.config, {
       mode: config.mode && config.mode === 'vertical' ? 'vertical' : 'horizontal',
-      initialSlide: checkDefaultProps<number>(config.initialSlide, 0),
-      morePairSlides: checkDefaultProps<number>(config.morePairSlides, 1),
-      threshold: checkDefaultProps<number>(config.threshold, 1, 5),
-      angle: checkDefaultProps<number>(config.angle, 1, 45),
-      margin: checkDefaultProps<number>(config.margin, 0, 20),
-      perspective: checkDefaultProps<number>(config.perspective, 1, 2000),
-      endInSlide: checkDefaultProps<boolean>(config.endInSlide, true),
-      timeToSlide: checkDefaultProps<number>(config.timeToSlide, 1, 300),
-      lockSlides: checkDefaultProps<boolean>(config.lockSlides, false),
-      loop: checkDefaultProps<boolean>(config.loop, false),
-      autoPlay: checkDefaultProps<boolean>(config.autoPlay, false),
-      delayAutoPlay: checkDefaultProps<number>(config.delayAutoPlay, 1, 3000)
+      initialSlide: checkDefaultProps<number>(config.initialSlide || this.config.initialSlide, 0),
+      morePairSlides: checkDefaultProps<number>(config.morePairSlides || this.config.morePairSlides, 1),
+      threshold: checkDefaultProps<number>(config.threshold || this.config.threshold, 1, 5),
+      angle: checkDefaultProps<number>(config.angle || this.config.angle, 1, 45),
+      margin: checkDefaultProps<number>(config.margin || this.config.margin, 0, 20),
+      perspective: checkDefaultProps<number>(config.perspective || this.config.perspective, 1, 2000),
+      endInSlide: checkDefaultProps<boolean>(config.endInSlide || this.config.endInSlide, true),
+      timeToSlide: checkDefaultProps<number>(config.timeToSlide || this.config.timeToSlide, 1, 300),
+      lockSlides: checkDefaultProps<boolean>(config.lockSlides || this.config.lockSlides, false),
+      loop: checkDefaultProps<boolean>(config.loop || this.config.loop, false),
+      autoPlay: checkDefaultProps<boolean>(config.autoPlay || this.config.autoPlay, false),
+      delayAutoPlay: checkDefaultProps<number>(config.delayAutoPlay || this.config.initialSlide, 1, 3000)
     })
+    console.log(this.config)
   }
 }

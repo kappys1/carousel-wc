@@ -241,7 +241,7 @@ export default class CarouselCore {
       this.carouselConfig.degreesSlides.push(auxDegree)
       this.carouselConfig.maxDegree = auxDegree
       auxDegree += +this.carouselConfig.config.angle
-      console.log(auxDegree)
+      console.log(auxDegree, this.carouselConfig.radius)
     })
   }
 
@@ -287,7 +287,7 @@ export default class CarouselCore {
   private removeClassShowSlides (tagClass: string) {
     console.log(this.root)
     if (this.itemsCarouselElm.length > 0) {
-      this.itemsCarouselElm.filter(elm => elm.classList.contains(tagClass)).map((val: any) => {
+      this.itemsCarouselElm.filter((elm: Element) => elm.classList.contains(tagClass)).map((val: any) => {
         val.classList.remove(tagClass)
       })
     }
