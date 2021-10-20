@@ -5,9 +5,9 @@
  * @ignore
  */
 
-import { ICarouselCoreConfig } from '../carousel.interface'
-import { checkDefaultProps } from '../carousel.utils'
-import { defaultCarouselConfig } from './Carousel.constants'
+import { ICarouselCoreConfig } from './carousel.interface'
+import { checkDefaultProps } from './carousel.utils'
+import { defaultCarouselConfig } from './carousel.constants'
 
 export default class CarouselConfig {
   currdeg: number = 0

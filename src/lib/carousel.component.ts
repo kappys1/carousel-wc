@@ -7,9 +7,8 @@ import { SwiperDirective } from './directives/swiper.directive'
 import CarouselCore from './carousel.core'
 import { ICarouselCoreConfig } from './carousel.interface'
 
-export let Carousel: any = null
 @customElement('carousel-component')
-export default class CarouselComponent extends LitElement {
+export class CarouselComponent extends LitElement {
   static styles = carouselStyle
 
   @property() public mode = 'horizontal'
@@ -29,13 +28,19 @@ export default class CarouselComponent extends LitElement {
   @property() public autoPlay = false
   @property() public delayAutoPlay = 3000
 
-  private carouselCore: CarouselCore | undefined
+  rootElement
+  public carouselCore: CarouselCore | undefined
   domChangeDirective = directive(DomChangeDirective)
   swiperDirective = directive(SwiperDirective)
 
   //
   // start: -- lit lifecicle methods
   //
+
+  constructor (rootElement?: any) {
+    super()
+    this.rootElement = rootElement
+  }
 
   render () {
     return html`
@@ -50,20 +55,15 @@ export default class CarouselComponent extends LitElement {
   }
 
   firstUpdated () {
-    const carouselElm: any = this.renderRoot.querySelector('.carousel')
-    const containerElm = this.renderRoot.querySelector('.container')
-    const slot = carouselElm.querySelector('slot')
-    const itemsCarouselElm = slot.assignedNodes({ flatten: true }).filter((node: any) => node.nodeType === Node.ELEMENT_NODE)
+    const root = this.rootElement ? this.rootElement.renderRoot : this.renderRoot
     const config = this.getParamsProperties()
-    this.carouselCore = new CarouselCore(carouselElm, containerElm, itemsCarouselElm, config)
-    Carousel = this.carouselCore
+    this.carouselCore = new CarouselCore(root, config)
     // todo event init
   }
 
   onDomChange ($event: any) {
     if (this && this.carouselCore && $event.addedNodes.length > 0) {
       const carouselConfig = this.carouselCore.getConfig()
-      console.log(carouselConfig)
       if (carouselConfig.itemsCarouselRendered === 0) {
         this.carouselCore.reInit()
       } else {

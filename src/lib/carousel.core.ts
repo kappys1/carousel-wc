@@ -3,16 +3,12 @@ import { ICarouselCoreConfig } from './carousel.interface'
 import { carouselStyle } from './carousel.style'
 import { EVENTS } from './directives/swiper.directive'
 import { EventEmitter } from './EventEmitter'
-import CarouselConfig from './model/carouselConfig'
+import CarouselConfig from './carousel.config'
 
 export default class CarouselCore {
   static styles = carouselStyle
 
   private carouselConfig: CarouselConfig = new CarouselConfig()
-
-  // private radius: number = 0
-  // private rotationFn: string = ''
-  // public itemsCarouselRendered = 0
   private autoPlayTimeout: any
 
   carouselElm!: any
@@ -20,15 +16,15 @@ export default class CarouselCore {
   itemsCarouselElm: any
   eventBus: any
 
-  constructor (carouselElm: any, containerElm: any, itemsCarouselElm: any, config?: any) {
-    this.carouselElm = carouselElm
-    this.containerElm = containerElm
-    this.itemsCarouselElm = itemsCarouselElm
-    // this.itemsCarouselRendered = this.itemsCarouselElm.length
+  constructor (root: any, config?: any) {
+    this.carouselElm = root.querySelector('.container')
+    this.containerElm = this.containerElm.querySelector('.carousel')
+    const slot = this.carouselElm.querySelector('slot')
+    this.itemsCarouselElm = slot.assignedNodes({ flatten: true }).filter((node: any) => node.nodeType === Node.ELEMENT_NODE)
+
     this.eventBus = new EventEmitter(this.carouselElm)
     this.carouselConfig = new CarouselConfig(config)
     this.carouselConfig.itemsCarouselRendered = this.itemsCarouselElm.length
-    console.log(this.carouselConfig)
     this.initEventsPan()
     this.configPlugin()
   }
@@ -83,6 +79,15 @@ export default class CarouselCore {
     this.configPlugin()
   }
 
+  public removeEventsPan () {
+    this.eventBus.off(EVENTS.SWIPE, this.rotate)
+    this.eventBus.off(EVENTS.SWIPE_END, this.rotate)
+  }
+
+  public getConfig () {
+    return this.carouselConfig
+  }
+
   public updateFn () {
     this.setPerspectiveContainer()
     this.checkRotation()
@@ -92,10 +97,6 @@ export default class CarouselCore {
     this.carouselConfig.lockSlides = this.carouselConfig.config.lockSlides
     this.setDegreesOnSlides()
     this.setTransformCarrousel(-this.carouselConfig.degreesSlides[this.carouselConfig.activeIndex])
-  }
-
-  public getConfig () {
-    return this.carouselConfig
   }
 
   private configPlugin () {
@@ -109,11 +110,6 @@ export default class CarouselCore {
   private initEventsPan () {
     this.eventBus.on(EVENTS.SWIPE, (e: any) => this.rotate(e.detail))
     this.eventBus.on(EVENTS.SWIPE_END, (e: any) => this.rotate(e.detail))
-  }
-
-  public removeEventsPan () {
-    this.eventBus.off(EVENTS.SWIPE, this.rotate)
-    this.eventBus.off(EVENTS.SWIPE_END, this.rotate)
   }
 
   private rotate (e: any) {

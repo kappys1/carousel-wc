@@ -1,4 +1,4 @@
-import { ICarouselCoreConfig } from '../carousel.interface'
+import { ICarouselCoreConfig } from './carousel.interface'
 
 export const defaultCarouselConfig: ICarouselCoreConfig = {
   initialSlide: 0,
