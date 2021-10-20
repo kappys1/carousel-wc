@@ -7,7 +7,7 @@
 
 import { ICarouselCoreConfig } from './carousel.interface'
 import { checkDefaultProps } from './carousel.utils'
-import { defaultCarouselConfig } from './carousel.constants'
+import { CAROUSEL_MODE, defaultCarouselConfig } from './carousel.constants'
 
 export default class CarouselConfig {
   currdeg: number = 0
@@ -38,7 +38,7 @@ export default class CarouselConfig {
   public setConfig (config: Partial<ICarouselCoreConfig>) {
     console.log(config)
     this.config = Object.assign(this.config, {
-      mode: config.mode && config.mode === 'vertical' ? 'vertical' : 'horizontal',
+      mode: config.mode && config.mode === CAROUSEL_MODE.VERTICAL ? CAROUSEL_MODE.VERTICAL : CAROUSEL_MODE.HORIZONTAL,
       initialSlide: checkDefaultProps<number>(config.initialSlide || this.config.initialSlide, 0),
       morePairSlides: checkDefaultProps<number>(config.morePairSlides || this.config.morePairSlides, 1),
       threshold: checkDefaultProps<number>(config.threshold || this.config.threshold, 1, 5),

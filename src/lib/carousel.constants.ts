@@ -1,5 +1,10 @@
 import { ICarouselCoreConfig } from './carousel.interface'
 
+export const CAROUSEL_MODE = {
+  VERTICAL: 'vertical',
+  HORIZONTAL: 'horizontal'
+}
+
 export const defaultCarouselConfig: ICarouselCoreConfig = {
   initialSlide: 0,
   morePairSlides: 1,
@@ -11,7 +16,7 @@ export const defaultCarouselConfig: ICarouselCoreConfig = {
   timeToSlide: 300,
   lockSlides: false,
   loop: false,
-  mode: 'horizontal',
+  mode: CAROUSEL_MODE.HORIZONTAL,
   autoPlay: false,
   delayAutoPlay: 3000
 }

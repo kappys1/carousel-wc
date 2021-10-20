@@ -18,7 +18,7 @@ export class Carousel {
   lockSlides = (val: boolean) => this.element.lockSlides = val
   autoPlayStart = () => this.carouselCore.autoPlayStart()
   autoPlayStop = () => this.carouselCore.autoPlayStop()
-  toggleMode = () => this.element.toggleMode('vertical')
+  toggleMode = () => this.element.toggleMode()
   toreInitggleMode = () => this.carouselCore.reInit()
   getConfig = () => this.carouselCore.getConfig()
 }

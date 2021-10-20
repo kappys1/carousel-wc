@@ -4,6 +4,7 @@ import { carouselStyle } from './carousel.style'
 import { EVENTS } from './directives/swiper.directive'
 import { EventEmitter } from './EventEmitter'
 import CarouselConfig from './carousel.config'
+import { CAROUSEL_MODE } from './carousel.constants'
 
 export default class CarouselCore {
   static styles = carouselStyle
@@ -73,7 +74,7 @@ export default class CarouselCore {
   }
 
   public toggleMode () {
-    this.carouselConfig.config.mode = this.carouselConfig.config.mode === 'vertical' ? 'horizontal' : 'vertical'
+    this.carouselConfig.config.mode = this.carouselConfig.config.mode === CAROUSEL_MODE.VERTICAL ? CAROUSEL_MODE.HORIZONTAL : CAROUSEL_MODE.VERTICAL
     this.updateFn()
   }
 
@@ -163,7 +164,7 @@ export default class CarouselCore {
   }
 
   private checkRotation () {
-    this.carouselConfig.isHorizontal = this.carouselConfig.config.mode !== 'vertical'
+    this.carouselConfig.isHorizontal = this.carouselConfig.config.mode !== CAROUSEL_MODE.VERTICAL
     this.carouselConfig.rotationFn = this.carouselConfig.isHorizontal
       ? 'rotateY'
       : 'rotateX'
@@ -241,7 +242,6 @@ export default class CarouselCore {
       this.carouselConfig.degreesSlides.push(auxDegree)
       this.carouselConfig.maxDegree = auxDegree
       auxDegree += +this.carouselConfig.config.angle
-      console.log(auxDegree, this.carouselConfig.radius)
     })
   }
 
@@ -255,7 +255,6 @@ export default class CarouselCore {
         index = i
       }
     })
-    console.log('detectCurrentSlide', this.carouselConfig.activeIndex, index)
     if (this.carouselConfig.activeIndex !== index) {
       this.carouselConfig.lastIndex = this.carouselConfig.activeIndex
       this.carouselConfig.activeIndex = index
@@ -285,7 +284,6 @@ export default class CarouselCore {
   }
 
   private removeClassShowSlides (tagClass: string) {
-    console.log(this.root)
     if (this.itemsCarouselElm.length > 0) {
       this.itemsCarouselElm.filter((elm: Element) => elm.classList.contains(tagClass)).map((val: any) => {
         val.classList.remove(tagClass)
