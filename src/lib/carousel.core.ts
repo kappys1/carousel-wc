@@ -11,12 +11,15 @@ export default class CarouselCore {
   private carouselConfig: CarouselConfig = new CarouselConfig()
   private autoPlayTimeout: any
 
+  root: any
   carouselElm!: any
   containerElm!: any
+
   itemsCarouselElm: any
   eventBus: any
 
   constructor (root: any) {
+    this.root = root
     this.containerElm = root.querySelector('.container')
     this.carouselElm = this.containerElm.querySelector('.carousel')
     const slot = this.carouselElm.querySelector('slot')
@@ -252,6 +255,7 @@ export default class CarouselCore {
         index = i
       }
     })
+    console.log('detectCurrentSlide', this.carouselConfig.activeIndex, index)
     if (this.carouselConfig.activeIndex !== index) {
       this.carouselConfig.lastIndex = this.carouselConfig.activeIndex
       this.carouselConfig.activeIndex = index
@@ -281,8 +285,9 @@ export default class CarouselCore {
   }
 
   private removeClassShowSlides (tagClass: string) {
-    if (this.carouselElm.getElementsByClassName(tagClass).length > 0) {
-      Array.from(this.carouselElm.getElementsByClassName(tagClass)).map((val: any) => {
+    console.log(this.root)
+    if (this.itemsCarouselElm.length > 0) {
+      this.itemsCarouselElm.filter(elm => elm.classList.contains(tagClass)).map((val: any) => {
         val.classList.remove(tagClass)
       })
     }
