@@ -35,7 +35,7 @@ export default class CarouselConfig {
     }
   }
 
-  public setConfig (config: ICarouselCoreConfig) {
+  public setConfig (config: Partial<ICarouselCoreConfig>) {
     this.config = Object.assign(this.config, {
       mode: config.mode && config.mode === 'vertical' ? 'vertical' : 'horizontal',
       initialSlide: checkDefaultProps<number>(config.initialSlide, 0),

@@ -18,7 +18,7 @@ export class Carousel {
   slideTo = (index: number) => this.carouselCore.slideTo(index)
   autoPlayStart = () => this.carouselCore.autoPlayStart()
   autoPlayStop = () => this.carouselCore.autoPlayStop()
-  toggleMode = () => this.carouselCore.toggleMode()
+  toggleMode = () => this.element.toggleMode('vertical')
   toreInitggleMode = () => this.carouselCore.reInit()
   getConfig = () => this.carouselCore.getConfig()
 }

@@ -16,20 +16,20 @@ export default class CarouselCore {
   itemsCarouselElm: any
   eventBus: any
 
-  constructor (root: any, config?: any) {
-    this.carouselElm = root.querySelector('.container')
-    this.containerElm = this.containerElm.querySelector('.carousel')
+  constructor (root: any) {
+    this.containerElm = root.querySelector('.container')
+    this.carouselElm = this.containerElm.querySelector('.carousel')
     const slot = this.carouselElm.querySelector('slot')
     this.itemsCarouselElm = slot.assignedNodes({ flatten: true }).filter((node: any) => node.nodeType === Node.ELEMENT_NODE)
 
     this.eventBus = new EventEmitter(this.carouselElm)
-    this.carouselConfig = new CarouselConfig(config)
+    this.carouselConfig = new CarouselConfig()
     this.carouselConfig.itemsCarouselRendered = this.itemsCarouselElm.length
     this.initEventsPan()
     this.configPlugin()
   }
 
-  public updateWithConfig (config: ICarouselCoreConfig) {
+  public updateWithConfig (config: Partial<ICarouselCoreConfig>) {
     this.carouselConfig.setConfig(config)
     this.updateFn()
   }
@@ -237,7 +237,8 @@ export default class CarouselCore {
       val.style.webkitTransform = transform
       this.carouselConfig.degreesSlides.push(auxDegree)
       this.carouselConfig.maxDegree = auxDegree
-      auxDegree += this.carouselConfig.config.angle
+      auxDegree += +this.carouselConfig.config.angle
+      console.log(auxDegree)
     })
   }
 

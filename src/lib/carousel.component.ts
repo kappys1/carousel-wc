@@ -11,22 +11,22 @@ import { ICarouselCoreConfig } from './carousel.interface'
 export class CarouselComponent extends LitElement {
   static styles = carouselStyle
 
-  @property() public mode = 'horizontal'
-  @property() public morePairSlides = 1
-  @property() public threshold = 5
-  @property() public angle = 45
-  @property() public ratioScale = 1
-  @property() public margin = 20
-  @property() public perspective = 2000
-  @property() public endInSlide = true
-  @property() public timeToSlide = 300
-  @property() public lockSlides = false
-  @property() public initialSlide = 0
-  @property() public loop = false
+  @property({ type: String, reflect: true }) public mode: string | undefined
+  @property({ type: Number, reflect: true }) public morePairSlides: number | undefined
+  @property({ type: Number, reflect: true }) public threshold: number | undefined
+  @property({ type: Number, reflect: true }) public angle: number | undefined
+  @property({ type: Number, reflect: true }) public ratioScale: number | undefined
+  @property({ type: Number, reflect: true }) public margin: number | undefined
+  @property({ type: Number, reflect: true }) public perspective: number | undefined
+  @property({ type: Boolean, reflect: true }) public endInSlide: boolean | undefined
+  @property({ type: Number, reflect: true }) public timeToSlide: number | undefined
+  @property({ type: Boolean, reflect: true }) public lockSlides: boolean | undefined
+  @property({ type: Number, reflect: true }) public initialSlide: number | undefined
+  @property({ type: Boolean, reflect: true }) public loop: boolean | undefined
 
   // autoPlay
-  @property() public autoPlay = false
-  @property() public delayAutoPlay = 3000
+  @property({ type: Boolean, reflect: true }) public autoPlay: boolean | undefined
+  @property({ type: Number, reflect: true }) public delayAutoPlay: number | undefined
 
   rootElement
   public carouselCore: CarouselCore | undefined
@@ -56,8 +56,7 @@ export class CarouselComponent extends LitElement {
 
   firstUpdated () {
     const root = this.rootElement ? this.rootElement.renderRoot : this.renderRoot
-    const config = this.getParamsProperties()
-    this.carouselCore = new CarouselCore(root, config)
+    this.carouselCore = new CarouselCore(root)
     // todo event init
   }
 
@@ -79,8 +78,14 @@ export class CarouselComponent extends LitElement {
     this.carouselCore?.removeEventsPan()
   }
 
-  updated () {
-    this.updateCarouselCore()
+  updated (changedProperties: any) {
+    if (this.carouselCore) {
+      const resConfig: Partial<ICarouselCoreConfig> | any = {}
+      for (const key of changedProperties.keys()) {
+        resConfig[key] = this[key]
+      }
+      this.carouselCore.updateWithConfig(resConfig)
+    }
   }
   //
   // END: -- lit lifecicle methods
@@ -89,30 +94,6 @@ export class CarouselComponent extends LitElement {
   //
   // Start: -- Public interface methods
   //
-  private getParamsProperties (): ICarouselCoreConfig {
-    return {
-      mode: this.mode,
-      morePairSlides: this.morePairSlides,
-      threshold: this.threshold,
-      angle: this.angle,
-      margin: this.margin,
-      perspective: this.perspective,
-      endInSlide: this.endInSlide,
-      timeToSlide: this.timeToSlide,
-      lockSlides: this.lockSlides,
-      initialSlide: this.initialSlide,
-      loop: this.loop,
-      autoPlay: this.autoPlay,
-      delayAutoPlay: this.delayAutoPlay
-    }
-  }
-
-  private updateCarouselCore () {
-    if (this.carouselCore) {
-      const config: ICarouselCoreConfig = this.getParamsProperties()
-      this.carouselCore.updateWithConfig(config)
-    }
-  }
 
   //
   // END: -- Public interface methods
