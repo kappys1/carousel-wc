@@ -27,8 +27,11 @@ HTML:
 
 JS
 ```js
-// if you don want to control anything
+// if you don want to control anything, just import the library
 import 'carousel-wc'
+
+// ------------
+
 // if you want to control everything of carousel
 import {Carousel} from './lib'
 
