@@ -12,13 +12,13 @@ export class Carousel {
     this.carouselCore = this.element.carouselCore
   }
 
-  slideNext = () => this.carouselCore.slideNext()
-  slidePrev = () => this.carouselCore.slidePrev()
-  slideTo = (index: number) => this.carouselCore.slideTo(index)
-  lockSlides = (val: boolean) => this.element.lockSlides = val
-  autoPlayStart = () => this.carouselCore.autoPlayStart()
-  autoPlayStop = () => this.carouselCore.autoPlayStop()
+  slideNext = () => this.element.slideNext()
+  slidePrev = () => this.element.slidePrev()
+  slideTo = (index: number) => this.element.slideTo(index)
+  lockSlides = (val: boolean) => this.element.lockSlides(val)
+  autoPlayStart = () => this.element.autoPlayStart()
+  autoPlayStop = () => this.element.autoPlayStop()
   toggleMode = () => this.element.toggleMode()
-  toreInitggleMode = () => this.carouselCore.reInit()
-  getConfig = () => this.carouselCore.getConfig()
+  toreInitggleMode = () => this.element.reInit()
+  getConfig = () => this.element.getConfig()
 }

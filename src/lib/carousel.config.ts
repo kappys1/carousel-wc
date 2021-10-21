@@ -36,7 +36,6 @@ export default class CarouselConfig {
   }
 
   public setConfig (config: Partial<ICarouselCoreConfig>) {
-    console.log(config)
     this.config = Object.assign(this.config, {
       mode: checkModeProp(config.mode || this.config.mode),
       initialSlide: checkDefaultProps<number>(config.initialSlide || this.config.initialSlide, 0),
@@ -52,6 +51,5 @@ export default class CarouselConfig {
       autoPlay: checkDefaultProps<boolean>(config.autoPlay || this.config.autoPlay, false),
       delayAutoPlay: checkDefaultProps<number>(config.delayAutoPlay || this.config.initialSlide, 1, 3000)
     })
-    console.log(this.config)
   }
 }

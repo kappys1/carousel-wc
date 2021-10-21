@@ -6,7 +6,6 @@ import { DomChangeDirective } from './directives/dom-change.directive'
 import { SwiperDirective } from './directives/swiper.directive'
 import CarouselCore from './carousel.core'
 import { ICarouselCoreConfig } from './carousel.interface'
-import { CAROUSEL_MODE } from './carousel.constants'
 
 @customElement('carousel-component')
 export class CarouselComponent extends LitElement {
@@ -100,7 +99,7 @@ export class CarouselComponent extends LitElement {
   slideTo = (index: number) => this.carouselCore?.slideTo(index)
   lock = (val: boolean) => {
     this.carouselCore?.lockCarousel(val)
-    this.lockSlides = val
+    this.lockSlides = this.carouselCore?.getConfig().lockSlides
   }
 
   autoPlayStart = () => {
@@ -109,12 +108,13 @@ export class CarouselComponent extends LitElement {
   }
 
   autoPlayStop = () => {
-    this.autoPlay = false
     this.carouselCore?.autoPlayStop()
+    this.autoPlay = false
   }
 
   toggleMode = () => {
-    this.mode = this.mode === CAROUSEL_MODE.VERTICAL ? CAROUSEL_MODE.VERTICAL : CAROUSEL_MODE.VERTICAL
+    this.carouselCore?.toggleMode()
+    this.mode = this.carouselCore?.getConfig().config.mode
   }
 
   reInit = () => this.carouselCore?.reInit()
