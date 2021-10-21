@@ -1,18 +1,18 @@
 # Carousel Web Component
 
-light Carousel library for mobile and desktop.
+Light Carousel library for mobile and desktop.
 
 ### status : In development
 
-this is an adapted library of [ngx-carousel](https://github.com/kappys1/ngx-carousel) but now for all technologies.
+This is an adapted library of [ngx-carousel](https://github.com/kappys1/ngx-carousel) but now for all technologies.
 The reason to develop it in Web Components is to make easy the adaptability to all frameworks.
 In a future, it will be available to each specific modern framework
 
 Simple Demo : [Here](carousel-web-component.vercel.app)
+
 ## Usage
 
-
-in your html:
+HTML:
 
 ```html
 <carousel-component id="carousel1" angle="90" mode="horizontal">
@@ -25,7 +25,7 @@ in your html:
 </carousel-component>
 ```
 
-in your js
+JS
 ```js
 // if you don want to control anything
 import 'carousel-wc'
