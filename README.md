@@ -15,7 +15,7 @@ Simple Demo : [Here](https://carousel-web-component.vercel.app/)
 HTML:
 
 ```html
-<carousel-component id="carousel1" angle="90" mode="horizontal">
+<carousel-component id="carousel1">
   <div class="item-carousel">
     <img width="300" src="https://hatrabbits.com/wp-content/uploads/2017/01/random.jpg"/>
   </div>
