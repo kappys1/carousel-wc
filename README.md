@@ -1,6 +1,8 @@
-# Carousel Web Component
+# Carousel Web Component
 
-### status : In development
+light Carousel library for mobile and desktop.
+
+### status : In development
 
 this is an adapted library of [ngx-carousel](https://github.com/kappys1/ngx-carousel) but now for all technologies.
 The reason to develop it in Web Components is to make easy the adaptability to all frameworks.
