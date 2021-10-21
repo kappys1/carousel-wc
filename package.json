@@ -17,6 +17,7 @@
     "dev": "vite",
     "lint": "npx eslint .",
     "release": "standard-version",
+    "build:lib": "tsc && vite build -c vite.lib.config.js",
     "build": "tsc && vite build",
     "serve": "vite preview",
     "prepare": "husky install"
@@ -32,13 +33,13 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
+    "husky": "^7.0.4",
     "standard-version": "^9.3.2",
     "typescript": "^4.4.4",
     "vite": "^2.6.4"
   },
   "dependencies": {
-    "lit": "^2.0.2",
-    "mitt": "^3.0.0"
+    "lit": "^2.0.2"
   },
   "commitlint": {
     "extends": [
