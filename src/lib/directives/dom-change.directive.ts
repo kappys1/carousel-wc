@@ -2,7 +2,7 @@
 import { Directive } from 'lit/directive.js'
 
 export class DomChangeDirective extends Directive {
-  private changes: MutationObserver | null = null
+  private changes: MutationObserver | null = null
   private readonly element
   constructor (partInfo: any) {
     super(partInfo)

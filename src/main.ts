@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Carousel } from './lib/carousel'
 
 import './style.css'
