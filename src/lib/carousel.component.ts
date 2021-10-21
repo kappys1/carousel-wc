@@ -8,33 +8,39 @@ import CarouselCore from './carousel.core'
 import { ICarouselCoreConfig } from './carousel.interface'
 
 @customElement('carousel-component')
-export default class CarouselComponent extends LitElement {
+export class CarouselComponent extends LitElement {
   static styles = carouselStyle
 
-  @property() public mode = 'horizontal'
-  @property() public morePairSlides = 1
-  @property() public threshold = 5
-  @property() public angle = 45
-  @property() public ratioScale = 1
-  @property() public margin = 20
-  @property() public perspective = 2000
-  @property() public endInSlide = true
-  @property() public timeToSlide = 300
-  @property() public lockSlides = false
-  @property() public initialSlide = 0
-  @property() public loop = false
+  @property({ type: String, reflect: true }) public mode: string | undefined
+  @property({ type: Number, reflect: true }) public morePairSlides: number | undefined
+  @property({ type: Number, reflect: true }) public threshold: number | undefined
+  @property({ type: Number, reflect: true }) public angle: number | undefined
+  @property({ type: Number, reflect: true }) public ratioScale: number | undefined
+  @property({ type: Number, reflect: true }) public margin: number | undefined
+  @property({ type: Number, reflect: true }) public perspective: number | undefined
+  @property({ type: Boolean, reflect: true }) public endInSlide: boolean | undefined
+  @property({ type: Number, reflect: true }) public timeToSlide: number | undefined
+  @property({ type: Boolean, reflect: true }) public lockSlides: boolean | undefined
+  @property({ type: Number, reflect: true }) public initialSlide: number | undefined
+  @property({ type: Boolean, reflect: true }) public loop: boolean | undefined
 
   // autoPlay
-  @property() public autoPlay = false
-  @property() public delayAutoPlay = 3000
+  @property({ type: Boolean, reflect: true }) public autoPlay: boolean | undefined
+  @property({ type: Number, reflect: true }) public delayAutoPlay: number | undefined
 
-  private carouselCore: CarouselCore | undefined
+  rootElement
+  public carouselCore: CarouselCore | undefined
   domChangeDirective = directive(DomChangeDirective)
   swiperDirective = directive(SwiperDirective)
 
   //
   // start: -- lit lifecicle methods
   //
+
+  constructor (rootElement?: any) {
+    super()
+    this.rootElement = rootElement
+  }
 
   render () {
     return html`
@@ -49,24 +55,21 @@ export default class CarouselComponent extends LitElement {
   }
 
   firstUpdated () {
-    const carouselElm: any = this.renderRoot.querySelector('.carousel')
-    const containerElm = this.renderRoot.querySelector('.container')
-    const slot = carouselElm.querySelector('slot')
-    const itemsCarouselElm = slot.assignedNodes({ flatten: true }).filter((node: any) => node.nodeType === Node.ELEMENT_NODE)
-    const config = this.getParamsProperties()
-    this.carouselCore = new CarouselCore(carouselElm, containerElm, itemsCarouselElm, config)
+    const root = this.rootElement ? this.rootElement.renderRoot : this.renderRoot
+    this.carouselCore = new CarouselCore(root)
     // todo event init
   }
 
   onDomChange ($event: any) {
     if (this && this.carouselCore && $event.addedNodes.length > 0) {
-      if (this.carouselCore.itemsCarouselRendered === 0) {
-        this.reInit()
+      const carouselConfig = this.carouselCore.getConfig()
+      if (carouselConfig.itemsCarouselRendered === 0) {
+        this.carouselCore.reInit()
       } else {
         this.carouselCore.updateFn()
         this.carouselCore.updateCssShowSlides()
       }
-      this.carouselCore.itemsCarouselRendered = this.carouselCore?.itemsCarouselElm.length.length
+      carouselConfig.itemsCarouselRendered = this.carouselCore?.itemsCarouselElm.length.length
     }
   }
 
@@ -75,9 +78,14 @@ export default class CarouselComponent extends LitElement {
     this.carouselCore?.removeEventsPan()
   }
 
-  updated () {
-    console.log('hola')
-    this.updateCarouselCore()
+  updated (changedProperties: any) {
+    if (this.carouselCore) {
+      const resConfig: Partial<ICarouselCoreConfig> | any = {}
+      for (const key of changedProperties.keys()) {
+        resConfig[key] = this[key]
+      }
+      this.carouselCore.updateWithConfig(resConfig)
+    }
   }
   //
   // END: -- lit lifecicle methods
@@ -86,65 +94,34 @@ export default class CarouselComponent extends LitElement {
   //
   // Start: -- Public interface methods
   //
-  public getParamsProperties (): ICarouselCoreConfig {
-    return {
-      mode: this.mode,
-      morePairSlides: this.morePairSlides,
-      threshold: this.threshold,
-      angle: this.angle,
-      ratioScale: this.ratioScale,
-      margin: this.margin,
-      perspective: this.perspective,
-      endInSlide: this.endInSlide,
-      timeToSlide: this.timeToSlide,
-      lockSlides: this.lockSlides,
-      initialSlide: this.initialSlide,
-      loop: this.loop
-    }
-  }
-
-  public lockCarousel (val: boolean) {
+  slideNext = () => this.carouselCore?.slideNext()
+  slidePrev = () => this.carouselCore?.slidePrev()
+  slideTo = (index: number) => this.carouselCore?.slideTo(index)
+  lock = (val: boolean) => {
     this.carouselCore?.lockCarousel(val)
+    this.lockSlides = this.carouselCore?.getConfig().lockSlides
   }
 
-  public slideNext () {
-    this.carouselCore?.slideNext()
-  }
-
-  public slidePrev () {
-    this.carouselCore?.slidePrev()
-  }
-
-  public slideTo (index: number) {
-    this.carouselCore?.slideTo(index)
-  }
-
-  public autoPlayStart () {
+  autoPlayStart = () => {
+    this.autoPlay = true
     this.carouselCore?.autoPlayStart()
   }
 
-  public autoPlayStop () {
+  autoPlayStop = () => {
     this.carouselCore?.autoPlayStop()
+    this.autoPlay = false
   }
 
-  public toggleMode () {
+  toggleMode = () => {
     this.carouselCore?.toggleMode()
+    this.mode = this.carouselCore?.getConfig().config.mode
   }
 
-  public reInit () {
-    this.carouselCore?.reInit()
-  }
-
+  reInit = () => this.carouselCore?.reInit()
+  getConfig = () => this.carouselCore?.getConfig()
   //
   // END: -- Public interface methods
   //
-
-  private updateCarouselCore () {
-    if (this.carouselCore) {
-      const config: ICarouselCoreConfig = this.getParamsProperties()
-      this.carouselCore.updateWithConfig(config)
-    }
-  }
 
   // private manageEvents () {
   //   const options: any = {

@@ -1,91 +1,57 @@
 
 import { ICarouselCoreConfig } from './carousel.interface'
 import { carouselStyle } from './carousel.style'
-import { checkDefaultProps } from './carousel.utils'
 import { EVENTS } from './directives/swiper.directive'
 import { EventEmitter } from './EventEmitter'
-import Carousel from './model/Carousel'
+import CarouselConfig from './carousel.config'
+import { CAROUSEL_MODE } from './carousel.constants'
 
 export default class CarouselCore {
   static styles = carouselStyle
 
-  public carousel: Carousel = new Carousel()
-
-  private config: ICarouselCoreConfig = {
-    initialSlide: 0,
-    morePairSlides: 1,
-    threshold: 5,
-    angle: 45,
-    margin: 20,
-    perspective: 2000,
-    endInSlide: true,
-    timeToSlide: 300,
-    lockSlides: false,
-    loop: false,
-    mode: 'horizontal',
-    autoPlay: false,
-    delayAutoPlay: 3000
-  }
-
-  private radius: number = 0
-  private rotationFn: string = ''
-  public itemsCarouselRendered = 0
+  private carouselConfig: CarouselConfig = new CarouselConfig()
   private autoPlayTimeout: any
 
+  root: any
   carouselElm!: any
   containerElm!: any
+
   itemsCarouselElm: any
   eventBus: any
 
-  constructor (carouselElm: any, containerElm: any, itemsCarouselElm: any, config?: any) {
-    this.carouselElm = carouselElm
-    this.containerElm = containerElm
-    this.itemsCarouselElm = itemsCarouselElm
-    this.itemsCarouselRendered = this.itemsCarouselElm.length
+  constructor (root: any) {
+    this.root = root
+    this.containerElm = root.querySelector('.container')
+    this.carouselElm = this.containerElm.querySelector('.carousel')
+    const slot = this.carouselElm.querySelector('slot')
+    this.itemsCarouselElm = slot.assignedNodes({ flatten: true }).filter((node: any) => node.nodeType === Node.ELEMENT_NODE)
+
     this.eventBus = new EventEmitter(this.carouselElm)
-    this.setConfig(config)
+    this.carouselConfig = new CarouselConfig()
+    this.carouselConfig.itemsCarouselRendered = this.itemsCarouselElm.length
     this.initEventsPan()
     this.configPlugin()
   }
 
-  public setConfig (config: ICarouselCoreConfig) {
-    this.config = Object.assign(this.config, {
-      mode: config.mode && config.mode === 'vertical' ? 'vertical' : 'horizontal',
-      initialSlide: checkDefaultProps<number>(config.initialSlide, 0),
-      morePairSlides: checkDefaultProps<number>(config.morePairSlides, 1),
-      threshold: checkDefaultProps<number>(config.threshold, 1, 5),
-      angle: checkDefaultProps<number>(config.angle, 1, 45),
-      margin: checkDefaultProps<number>(config.margin, 0, 20),
-      perspective: checkDefaultProps<number>(config.perspective, 1, 2000),
-      endInSlide: checkDefaultProps<boolean>(config.endInSlide, true),
-      timeToSlide: checkDefaultProps<number>(config.timeToSlide, 1, 300),
-      lockSlides: checkDefaultProps<boolean>(config.lockSlides, false),
-      loop: checkDefaultProps<boolean>(config.loop, false),
-      autoPlay: checkDefaultProps<boolean>(config.autoPlay, false),
-      delayAutoPlay: checkDefaultProps<number>(config.delayAutoPlay, 1, 3000)
-    })
-    console.log(this.config)
-  }
-
-  public updateWithConfig (config: ICarouselCoreConfig) {
-    this.setConfig(config)
+  public updateWithConfig (config: Partial<ICarouselCoreConfig>) {
+    this.carouselConfig.setConfig(config)
     this.updateFn()
   }
 
   public lockCarousel (val: boolean) {
-    this.carousel.lockSlides = val
+    this.carouselConfig.lockSlides = val
   }
 
   public slideNext () {
-    if (this.checkLimitsCarrousel(this.carousel.activeIndex + 1)) {
-      this.moveSlideTo(this.carousel.activeIndex + 1)
+    if (this.checkLimitsCarrousel(this.carouselConfig.activeIndex + 1)) {
+      this.moveSlideTo(this.carouselConfig.activeIndex + 1)
       setTimeout(() => this.detectCurrentSlide())
     }
   }
 
   public slidePrev () {
-    if (this.checkLimitsCarrousel(this.carousel.activeIndex - 1)) {
-      this.moveSlideTo(this.carousel.activeIndex - 1)
+    if (this.checkLimitsCarrousel(this.carouselConfig.activeIndex - 1)) {
+      this.moveSlideTo(this.carouselConfig.activeIndex - 1)
       setTimeout(() => this.detectCurrentSlide())
     }
   }
@@ -98,34 +64,43 @@ export default class CarouselCore {
   }
 
   public autoPlayStart () {
-    this.config.autoPlay = true
+    this.carouselConfig.config.autoPlay = true
     this.autoPlaySlide()
   }
 
   public autoPlayStop () {
     clearInterval(this.autoPlayTimeout)
-    this.carousel.autoPlayIsRunning = false
+    this.carouselConfig.autoPlayIsRunning = false
   }
 
   public toggleMode () {
-    this.config.mode = this.config.mode === 'vertical' ? 'horizontal' : 'vertical'
+    this.carouselConfig.config.mode = this.carouselConfig.config.mode === CAROUSEL_MODE.VERTICAL ? CAROUSEL_MODE.HORIZONTAL : CAROUSEL_MODE.VERTICAL
     this.updateFn()
   }
 
   public reInit () {
-    this.carousel = new Carousel()
+    this.carouselConfig = new CarouselConfig()
     this.configPlugin()
+  }
+
+  public removeEventsPan () {
+    this.eventBus.off(EVENTS.SWIPE, this.rotate)
+    this.eventBus.off(EVENTS.SWIPE_END, this.rotate)
+  }
+
+  public getConfig () {
+    return this.carouselConfig
   }
 
   public updateFn () {
     this.setPerspectiveContainer()
     this.checkRotation()
-    this.carousel.items = [...this.itemsCarouselElm]
-    this.carousel.totalItems = this.carousel.items.length
+    this.carouselConfig.items = [...this.itemsCarouselElm]
+    this.carouselConfig.totalItems = this.carouselConfig.items.length
     this.getmaxSizes()
-    this.carousel.lockSlides = this.config.lockSlides
+    this.carouselConfig.lockSlides = this.carouselConfig.config.lockSlides
     this.setDegreesOnSlides()
-    this.setTransformCarrousel(-this.carousel.degreesSlides[this.carousel.activeIndex])
+    this.setTransformCarrousel(-this.carouselConfig.degreesSlides[this.carouselConfig.activeIndex])
   }
 
   private configPlugin () {
@@ -141,72 +116,67 @@ export default class CarouselCore {
     this.eventBus.on(EVENTS.SWIPE_END, (e: any) => this.rotate(e.detail))
   }
 
-  public removeEventsPan () {
-    this.eventBus.off(EVENTS.SWIPE, this.rotate)
-    this.eventBus.off(EVENTS.SWIPE_END, this.rotate)
-  }
-
   private rotate (e: any) {
-    if (!this.carousel.lockSlides) {
-      const velocity = this.carousel.isHorizontal ? e.velocityX / this.config.threshold : -e.velocityY / this.config.threshold
-      this.setNewDeg(this.carousel.currdeg + velocity * window.devicePixelRatio)
-      this.moveCarrousel(this.carousel.currdeg)
-      if (e.isFinal && this.config.endInSlide) {
-        this.moveSlideTo(this.carousel.activeIndex)
+    if (!this.carouselConfig.lockSlides) {
+      const velocity = this.carouselConfig.isHorizontal ? e.velocityX / this.carouselConfig.config.threshold : -e.velocityY / this.carouselConfig.config.threshold
+      this.setNewDeg(this.carouselConfig.currdeg + velocity * window.devicePixelRatio)
+      this.moveCarrousel(this.carouselConfig.currdeg)
+      if (e.isFinal && this.carouselConfig.config.endInSlide) {
+        this.moveSlideTo(this.carouselConfig.activeIndex)
       }
     }
   }
 
   private autoPlaySlide () {
-    if (this.config.autoPlay) {
+    if (this.carouselConfig.config.autoPlay) {
       this.autoPlayTimeout = setTimeout(() => {
-        this.carousel.autoPlayIsRunning = true
+        this.carouselConfig.autoPlayIsRunning = true
         this.slideNext()
         this.autoPlaySlide()
-      }, this.config.delayAutoPlay)
+      }, this.carouselConfig.config.delayAutoPlay)
     }
   }
 
   private initSlidesOn () {
-    if (this.config.initialSlide >= 0 && this.config.initialSlide < this.carousel.items.length) {
-      this.carousel.activeIndex = parseInt(this.config.initialSlide.toString())
-    } else if (this.config.initialSlide >= this.carousel.items.length) {
-      this.carousel.activeIndex = this.carousel.items.length - 1
-      this.config.initialSlide = this.carousel.activeIndex
+    if (this.carouselConfig.config.initialSlide >= 0 && this.carouselConfig.config.initialSlide < this.carouselConfig.items.length) {
+      this.carouselConfig.activeIndex = parseInt(this.carouselConfig.config.initialSlide.toString())
+    } else if (this.carouselConfig.config.initialSlide >= this.carouselConfig.items.length) {
+      this.carouselConfig.activeIndex = this.carouselConfig.items.length - 1
+      this.carouselConfig.config.initialSlide = this.carouselConfig.activeIndex
     } else {
-      this.carousel.activeIndex = 0
-      this.config.initialSlide = this.carousel.activeIndex
+      this.carouselConfig.activeIndex = 0
+      this.carouselConfig.config.initialSlide = this.carouselConfig.activeIndex
     }
 
-    const newDeg = this.carousel.activeIndex * this.config.angle
+    const newDeg = this.carouselConfig.activeIndex * this.carouselConfig.config.angle
     this.setNewDeg(-newDeg)
     this.setTransformCarrousel(-newDeg)
   }
 
   private setNewDeg (newDeg: number) {
-    this.carousel.currdeg = newDeg
-    if (this.carousel.currdeg > 0) {
-      this.carousel.currdeg = 0
+    this.carouselConfig.currdeg = newDeg
+    if (this.carouselConfig.currdeg > 0) {
+      this.carouselConfig.currdeg = 0
     }
-    if (this.carousel.currdeg < -this.carousel.maxDegree) {
-      this.carousel.currdeg = -this.carousel.maxDegree
+    if (this.carouselConfig.currdeg < -this.carouselConfig.maxDegree) {
+      this.carouselConfig.currdeg = -this.carouselConfig.maxDegree
     }
   }
 
   private checkRotation () {
-    this.carousel.isHorizontal = this.config.mode !== 'vertical'
-    this.rotationFn = this.carousel.isHorizontal
+    this.carouselConfig.isHorizontal = this.carouselConfig.config.mode !== CAROUSEL_MODE.VERTICAL
+    this.carouselConfig.rotationFn = this.carouselConfig.isHorizontal
       ? 'rotateY'
       : 'rotateX'
   }
 
   private checkLimitsCarrousel (index: number) {
-    return this.carousel.activeIndex !== index && index >= 0 && index < this.carousel.totalItems
+    return this.carouselConfig.activeIndex !== index && index >= 0 && index < this.carouselConfig.totalItems
   }
 
   private moveSlideTo (index: number) {
-    this.setNewDeg(-this.carousel.degreesSlides[index])
-    this.moveCarrousel(this.carousel.currdeg, this.config.timeToSlide)
+    this.setNewDeg(-this.carouselConfig.degreesSlides[index])
+    this.moveCarrousel(this.carouselConfig.currdeg, this.carouselConfig.config.timeToSlide)
   }
 
   private moveCarrousel (deg: number, timeTransform: number = 0) {
@@ -218,92 +188,92 @@ export default class CarouselCore {
   }
 
   private setTransformCarrousel (deg: number) {
-    const transform = `translateZ(${-this.radius}px) ${this.rotationFn}(${deg}deg)`
+    const transform = `translateZ(${-this.carouselConfig.radius}px) ${this.carouselConfig.rotationFn}(${deg}deg)`
     this.carouselElm.style.transform = transform
     this.carouselElm.style.webkitTransform = transform
     this.sendSlideIsCentered()
   }
 
   private sendSlideIsCentered () {
-    if (this.carousel.currdeg === -this.carousel.degreesSlides[this.carousel.activeIndex]) {
-      // this.onSlideCentered.emit(this.carousel)
+    if (this.carouselConfig.currdeg === -this.carouselConfig.degreesSlides[this.carouselConfig.activeIndex]) {
+      // this.onSlideCentered.emit(this.carouselConfig)
     }
   }
 
   private setPerspectiveContainer () {
-    this.containerElm.style.perspective = this.config.perspective
-    this.containerElm.style.webkitPerspective = this.config.perspective
-    this.containerElm.style.MozPerspective = this.config.perspective
+    this.containerElm.style.perspective = this.carouselConfig.config.perspective
+    this.containerElm.style.webkitPerspective = this.carouselConfig.config.perspective
+    this.containerElm.style.MozPerspective = this.carouselConfig.config.perspective
   }
 
   private getmaxSizes () {
-    this.carousel.items.map((val: any) => {
+    this.carouselConfig.items.map((val: any) => {
       const width = val.offsetWidth
       const height = val.offsetHeight
-      this.carousel.maxWidthSize = 0
-      this.carousel.maxHeightSize = 0
-      if (width > this.carousel.maxWidthSize) {
-        this.carousel.maxWidthSize = width
-        this.carousel.totalWidth = this.carousel.items.length * this.carousel.maxWidthSize
+      this.carouselConfig.maxWidthSize = 0
+      this.carouselConfig.maxHeightSize = 0
+      if (width > this.carouselConfig.maxWidthSize) {
+        this.carouselConfig.maxWidthSize = width
+        this.carouselConfig.totalWidth = this.carouselConfig.items.length * this.carouselConfig.maxWidthSize
       }
-      if (height > this.carousel.maxHeightSize) {
-        this.carousel.maxHeightSize = height
-        this.carousel.totalWidth = this.carousel.items.length * this.carousel.maxHeightSize
+      if (height > this.carouselConfig.maxHeightSize) {
+        this.carouselConfig.maxHeightSize = height
+        this.carouselConfig.totalWidth = this.carouselConfig.items.length * this.carouselConfig.maxHeightSize
       }
     })
     this.setContainerWithMaxSize()
   }
 
   private setContainerWithMaxSize () {
-    this.containerElm.style.width = `${this.carousel.maxWidthSize}px`
-    this.containerElm.style.height = `${this.carousel.maxHeightSize}px`
+    this.containerElm.style.width = `${this.carouselConfig.maxWidthSize}px`
+    this.containerElm.style.height = `${this.carouselConfig.maxHeightSize}px`
   }
 
   private setDegreesOnSlides () {
     let auxDegree: number = 0
-    const panelSize = this.carousel.isHorizontal ? this.carousel.maxWidthSize : this.carousel.maxHeightSize
-    this.radius = (Math.round((panelSize / 2) /
-      Math.tan(Math.PI / (360 / this.config.angle))) + this.config.margin)
-    this.carousel.degreesSlides = []
-    this.carousel.items.map((val: any) => {
-      const transform = `${this.rotationFn}(${auxDegree}deg) translateZ(${this.radius}px)`
+    const panelSize = this.carouselConfig.isHorizontal ? this.carouselConfig.maxWidthSize : this.carouselConfig.maxHeightSize
+    this.carouselConfig.radius = (Math.round((panelSize / 2) /
+      Math.tan(Math.PI / (360 / this.carouselConfig.config.angle))) + this.carouselConfig.config.margin)
+    this.carouselConfig.degreesSlides = []
+    this.carouselConfig.items.map((val: any) => {
+      const transform = `${this.carouselConfig.rotationFn}(${auxDegree}deg) translateZ(${this.carouselConfig.radius}px)`
       val.style.transform = transform
       val.style.webkitTransform = transform
-      this.carousel.degreesSlides.push(auxDegree)
-      this.carousel.maxDegree = auxDegree
-      auxDegree += this.config.angle
+      this.carouselConfig.degreesSlides.push(auxDegree)
+      this.carouselConfig.maxDegree = auxDegree
+      auxDegree += +this.carouselConfig.config.angle
     })
   }
 
   private detectCurrentSlide () {
     let aux = 99e9
     let index = 0
-    this.carousel.degreesSlides.forEach((val: any, i: number) => {
-      const res = Math.abs(val - Math.abs(this.carousel.currdeg))
+    this.carouselConfig.degreesSlides.forEach((val: any, i: number) => {
+      const res = Math.abs(val - Math.abs(this.carouselConfig.currdeg))
       if (res < aux) {
         aux = res
         index = i
       }
     })
-    if (this.carousel.activeIndex !== index) {
-      this.carousel.lastIndex = this.carousel.activeIndex
-      this.carousel.activeIndex = index
+    if (this.carouselConfig.activeIndex !== index) {
+      this.carouselConfig.lastIndex = this.carouselConfig.activeIndex
+      this.carouselConfig.activeIndex = index
       this.updateCssShowSlides()
     }
   }
 
   public updateCssShowSlides () {
-    const currentIndex = this.carousel.activeIndex
-    const actual: any = this.carousel.items[currentIndex]
+    const currentIndex = this.carouselConfig.activeIndex
+    const actual: any = this.carouselConfig.items[currentIndex]
     this.removeClassShowSlides('actual')
     this.removeClassShowSlides('prev')
     this.removeClassShowSlides('next')
     if (actual) {
       actual.classList.add('actual')
     }
-    for (let x = 0; x < this.config.morePairSlides; x++) {
-      const prev = this.carousel.items[currentIndex - (x + 1)]
-      const next = this.carousel.items[currentIndex + (x + 1)]
+    for (let x = 0; x < this.carouselConfig.config.morePairSlides; x++) {
+      const prev = this.carouselConfig.items[currentIndex - (x + 1)]
+      const next = this.carouselConfig.items[currentIndex + (x + 1)]
       if (prev) {
         prev.classList.add('prev')
       }
@@ -314,8 +284,8 @@ export default class CarouselCore {
   }
 
   private removeClassShowSlides (tagClass: string) {
-    if (this.carouselElm.getElementsByClassName(tagClass).length > 0) {
-      Array.from(this.carouselElm.getElementsByClassName(tagClass)).map((val: any) => {
+    if (this.itemsCarouselElm.length > 0) {
+      this.itemsCarouselElm.filter((elm: Element) => elm.classList.contains(tagClass)).map((val: any) => {
         val.classList.remove(tagClass)
       })
     }

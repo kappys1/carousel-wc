@@ -39,10 +39,10 @@ export class SwiperDirective extends Directive {
     this.element = partInfo.parentNode
     this.eventBus = new EventEmitter(this.element)
     this.element.addEventListener('touchstart', (e: Event) => this.onTouchStart(e))
-    this.element.addEventListener('touchend', (e: Event) => this.onTouchEnd(e))
+    this.element.addEventListener('touchend', () => this.onTouchEnd())
     this.element.addEventListener('touchmove', (e: Event) => this.onTouchMove(e))
     this.element.addEventListener('mousedown', (e: Event) => this.onMouseDown(e))
-    this.element.addEventListener('mouseup', (e: Event) => this.onMouseUp(e))
+    this.element.addEventListener('mouseup', () => this.onMouseUp())
     this.element.addEventListener('mousemove', (e: Event) => this.onMouseMove(e))
   }
 
@@ -79,7 +79,7 @@ export class SwiperDirective extends Directive {
     // this.onSwipeStart.emit()
   }
 
-  swipeEnd (event: any) {
+  swipeEnd () {
     this.initialPosX = this.lastPosX = ZERO
     this.initialPosY = this.lastPosY = ZERO
     this.isDown = false
@@ -88,9 +88,7 @@ export class SwiperDirective extends Directive {
       velocityY: 0,
       isFinal: !this.isDown
     }
-    console.log(res, event)
     this.eventBus.emit(EVENTS.SWIPE_END, res)
-    // this.onSwipeEnd.emit(res)
     this.swipeDistanceX = ZERO
     this.swipeDistanceY = ZERO
   }
@@ -100,54 +98,43 @@ export class SwiperDirective extends Directive {
     if (res.velocityX > 0) {
       this.direction = DIRECTION.LEFT
       this.eventBus.emit(EVENTS.SWIPE_LEFT, res)
-      // this.onSwipeLeft.emit(res)
     } else if (res.velocityX < 0) {
       this.direction = DIRECTION.RIGHT
       this.eventBus.emit(EVENTS.SWIPE_RIGHT, res)
-      // this.onSwipeRight.emit(res)
     } else if (res.velocityY > 0) {
       this.direction = DIRECTION.DOWN
       this.eventBus.emit(EVENTS.SWIPE_DOWN, res)
-      // this.onSwipeDown.emit(res)
     } else if (res.velocityY < 0) {
       this.direction = DIRECTION.UP
       this.eventBus.emit(EVENTS.SWIPE_UP, res)
-      // this.onSwipeUp.emit(res)
     }
     this.eventBus.emit(EVENTS.SWIPE, res)
-    // this.onSwipe.emit(res)
   }
 
-  // @HostListener('touchstart', ['$event'])
   onTouchStart (event: any) {
     const touch = event.touches[0] || event.changedTouches[0]
     this.swipeStart(touch)
   }
 
-  // @HostListener('mousedown', ['$event'])
   onMouseDown (event: any) {
     this.swipeStart(event)
   }
 
-  // @HostListener('document:mouseup', ['$event'])
-  onMouseUp (event: any) {
-    this.swipeEnd(event)
+  onMouseUp () {
+    this.swipeEnd()
   }
 
-  // @HostListener('touchend', ['$event'])
-  onTouchEnd (event: any) {
-    const touch = event.touches[0] || event.changedTouches[0]
-    this.swipeEnd(touch)
+  onTouchEnd () {
+    // const touch = event.touches[0] || event.changedTouches[0]
+    this.swipeEnd()
   }
 
-  // @HostListener('mousemove', ['$event'])
   onMouseMove (event: any) {
     if (this.isDown) {
       this.swipeMove(event)
     }
   }
 
-  // @HostListener('touchmove', ['$event'])
   onTouchMove (event: any) {
     const touch = event.touches[0] || event.changedTouches[0]
     this.swipeMove(touch)

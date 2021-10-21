@@ -1,0 +1,17 @@
+img {
+  user-drag: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-drag: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.item-carousel{
+  opacity: 0;
+}
+.item-carousel.prev,
+.item-carousel.next,
+.item-carousel.actual {
+  opacity: 1;
+}
