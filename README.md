@@ -46,8 +46,11 @@ setTimeout(() => {
 ### Development
 
 Dev mode : ```npm run serve```
+
 Build: ```npm run build```
+
 Commit: ```npm run co```  To follow the rules.
+
 Release: ```npm run release```
 
 
