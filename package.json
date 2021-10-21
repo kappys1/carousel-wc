@@ -1,6 +1,6 @@
 {
   "name": "carousel",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "files": [
     "dist"
   ],
@@ -16,6 +16,7 @@
     "co": "sui-mono commit",
     "dev": "vite",
     "lint": "npx eslint .",
+    "release": "standard-version",
     "build": "tsc && vite build",
     "serve": "vite preview"
   },
@@ -27,6 +28,7 @@
     "eslint-plugin-import": "^2.25.2",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^5.1.0",
+    "standard-version": "^9.3.2",
     "typescript": "^4.4.4",
     "vite": "^2.6.4"
   },
