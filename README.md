@@ -31,11 +31,13 @@ JS
 import 'carousel-wc'
 // if you want to control everything of carousel
 import {Carousel} from './lib'
-  const elm = document.querySelector('#carousel1')
-  const carousel1 = new Carousel(elm)
-  setTimeout(() => {
-    carousel1.slideNext()
-  }, 1000)
+
+
+const elm = document.querySelector('#carousel1')
+const carousel1 = new Carousel(elm)
+setTimeout(() => {
+  carousel1.slideNext()
+}, 1000)
 ```
 
 ### Development
