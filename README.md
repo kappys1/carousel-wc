@@ -8,7 +8,7 @@ This is an adapted library of [ngx-carousel](https://github.com/kappys1/ngx-caro
 The reason to develop it in Web Components is to make easy the adaptability to all frameworks.
 In a future, it will be available to each specific modern framework
 
-Simple Demo : [Here](carousel-web-component.vercel.app)
+Simple Demo : [Here](https://carousel-web-component.vercel.app/)
 
 ## Usage
 
