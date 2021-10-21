@@ -8,7 +8,7 @@ import CarouselCore from './carousel.core'
 import { ICarouselCoreConfig } from './carousel.interface'
 
 @customElement('carousel-component')
-export class CarouselComponent extends LitElement {
+export default class CarouselComponent extends LitElement {
   static styles = carouselStyle
 
   @property({ type: String, reflect: true }) public mode: string | undefined
@@ -81,7 +81,9 @@ export class CarouselComponent extends LitElement {
   updated (changedProperties: any) {
     if (this.carouselCore) {
       const resConfig: Partial<ICarouselCoreConfig> | any = {}
-      for (const key of changedProperties.keys()) {
+      for (const keys of changedProperties.keys()) {
+        const key: any = keys
+        // @ts-expect-error
         resConfig[key] = this[key]
       }
       this.carouselCore.updateWithConfig(resConfig)
