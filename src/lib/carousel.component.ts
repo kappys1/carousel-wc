@@ -114,8 +114,7 @@ export class CarouselComponent extends LitElement {
   }
 
   toggleMode = () => {
-    this.mode = this.mode === CAROUSEL_MODE.VERTICAL ? CAROUSEL_MODE.HORIZONTAL : CAROUSEL_MODE.VERTICAL
-    // this.carouselCore?.toggleMode()
+    this.mode = this.mode === CAROUSEL_MODE.VERTICAL ? CAROUSEL_MODE.VERTICAL : CAROUSEL_MODE.VERTICAL
   }
 
   reInit = () => this.carouselCore?.reInit()
